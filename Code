@@ -1,0 +1,88 @@
+import os
+
+def add_items_to_menu(menu_items):
+    f = open('menu.txt', 'a')
+    item_number = int(input("How many items would you like to add? "))
+    for item in range(item_number):
+        item_name = input("What item would you like to add? ")
+        item_cals = input(f"How many Calories is the {item_name}? ")
+        protein = input(f"How much Protein is the {item_name}? ")
+        fats = input(f"How many Fats are there? ")
+        carbs = input(f"How many Carbs are there? ")
+        f.write(f"{item_name}: {item_cals} cals, {protein}g protein, {fats}g fats, {carbs}g carbs\n")
+        menu_items[item_name] = [item_cals, protein, fats, carbs]
+    f.close()
+    return menu_items
+
+
+def see_menu():
+    f = open('menu.txt','r')
+    for line in f:
+        print(line)
+
+def status():
+    who = input("Are you a Worker or a Customer? ").lower()
+    if who == "worker":
+        username = input("What is your username? ")
+        password = input("What is your password? ")
+        if username == "admin" and password == "1234":
+            print("Welcome back admin")
+            return "worker"
+    if who == "customer":
+        print("-------------Welcome Here is our menu-------------")
+        see_menu()
+        return "customer"
+
+def load_menu():
+    menu = {}
+    if os.path.exists('menu.txt'):
+        f = open('menu.txt', 'r')
+        for line in f:
+            if ":" in line:
+                parts = line.split(":")
+                name = parts[0].strip()
+                details = parts[1].strip()
+                menu[name] = details
+        f.close()
+    return menu
+
+
+def main():
+    current_menu = load_menu()
+
+    while True:
+        user_role = status()
+
+        if user_role == 'worker':
+            do = input("What would you like to do? (add/delete/logout/exit): ").lower()
+
+            if do == "add":
+                current_menu = add_items_to_menu(current_menu)
+            elif do == "delete":
+                delete_item = input("What item would you like to delete? ")
+                if delete_item in current_menu:
+                    del current_menu[delete_item]
+                    f = open('menu.txt', 'w')
+                    for name, details in current_menu.items():
+                        if isinstance(details, list):
+                            f.write(f"{name}: {details[0]} cals, {details[1]}g protein, {details[2]}g fats, {details[3]}g carbs\n")
+                        else:
+                            f.write(f"{name}: {details}\n")
+                    f.close()
+                    print(f"{delete_item} has been removed.")
+                else:
+                    print("Item not found.")
+
+            elif do == "logout":
+                print("Logging out...")
+                continue
+
+            elif do == "exit":
+                print("Goodbye!")
+                break
+
+        elif user_role == 'customer':
+            input("\nPress Enter to go back to the main screen...")
+
+if __name__ == '__main__':
+    main()
